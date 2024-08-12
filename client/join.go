@@ -3,17 +3,17 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/knexguy101/supabase-realtime-go"
+	"github.com/knexguy101/supabase-realtime-go/types"
 	"nhooyr.io/websocket/wsjson"
 )
 
 func (x *RealtimeClient) sendJoin() error {
-	msg := supabase_realtime_go.SubscribeMsg{
+	msg := types.SubscribeMsg{
 		Event: JOIN_EVENT,
 		Topic: "realtime:postgres",
 		Ref:   "",
-		Payload: supabase_realtime_go.SubscribePayload{
-			Config: supabase_realtime_go.SubscribeConfig{
+		Payload: types.SubscribePayload{
+			Config: types.SubscribeConfig{
 				PostgresChanges: x.events,
 			},
 		},

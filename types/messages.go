@@ -1,4 +1,4 @@
-package supabase_realtime_go
+package types
 
 type TemplateMsg struct {
 	Event string `json:"event"`

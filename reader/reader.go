@@ -3,8 +3,8 @@ package reader
 import (
 	"context"
 	"encoding/json"
-	supabase_realtime_go "github.com/knexguy101/supabase-realtime-go"
 	"github.com/knexguy101/supabase-realtime-go/client"
+	supabase_realtime_go "github.com/knexguy101/supabase-realtime-go/types"
 	"nhooyr.io/websocket/wsjson"
 	"reflect"
 )
@@ -25,6 +25,9 @@ func NewReader(c *client.RealtimeClient, s *SchemaBuilder) *Reader {
 	return &Reader{
 		client:  c,
 		schemas: s.List,
+
+		OnInsert: func(tableName string, message interface{}) {},
+		OnDelete: func(oldRecords map[string]interface{}) {},
 	}
 }
 
@@ -42,7 +45,7 @@ func (x *Reader) Dispose() {
 
 func (x *Reader) listen() {
 	for !x.disposed {
-		var updateData supabase_realtime_go.PostgresMessage[any]
+		var updateData supabase_realtime_go.PostgresMessage[interface{}]
 		err := wsjson.Read(x.ctx, x.client.GetWS(), &updateData)
 		if err != nil {
 			continue
@@ -62,21 +65,20 @@ func (x *Reader) listen() {
 						continue
 					}
 
-					temp := reflect.Zero(schema).Interface()
+					temp := reflect.New(schema).Interface()
 
 					err = json.Unmarshal(b, &temp)
 					if err != nil {
 						continue
 					}
 
-					x.OnInsert(updateData.Payload.Data.Table, temp)
+					x.OnInsert(updateData.Payload.Data.Table, reflect.ValueOf(temp).Elem().Interface())
 				}
 			case "DELETE":
 				{
 					x.OnDelete(updateData.Payload.Data.OldRecord)
 				}
 			case "UPDATE":
-
 			}
 		}
 	}

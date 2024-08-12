@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/knexguy101/supabase-realtime-go"
+	"github.com/knexguy101/supabase-realtime-go/types"
 	"nhooyr.io/websocket/wsjson"
 	"time"
 )
@@ -43,8 +43,8 @@ func (x *RealtimeClient) startHeartbeats() {
 }
 
 func (x *RealtimeClient) sendHeartbeat() error {
-	msg := supabase_realtime_go.HearbeatMsg{
-		TemplateMsg: supabase_realtime_go.TemplateMsg{
+	msg := types.HearbeatMsg{
+		TemplateMsg: types.TemplateMsg{
 			Event: HEARTBEAT_EVENT,
 			Topic: "phoenix",
 			Ref:   "",

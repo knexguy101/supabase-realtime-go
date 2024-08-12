@@ -46,7 +46,7 @@ func (x *RealtimeClient) dial() error {
 
 	x.conn = conn
 
-	return nil
+	return x.sendJoin()
 }
 
 func (x *RealtimeClient) isConnectionAlive(err error) bool {

@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/knexguy101/supabase-realtime-go"
+	"github.com/knexguy101/supabase-realtime-go/types"
 	"nhooyr.io/websocket"
 	"time"
 )
@@ -11,7 +11,7 @@ import (
 type RealtimeClient struct {
 	realtimeUrl string
 	apiKey      string
-	events      []supabase_realtime_go.PostgresChanges
+	events      []types.PostgresChanges
 
 	conn            *websocket.Conn
 	statusCtx       context.Context
@@ -29,7 +29,7 @@ type RealtimeClient struct {
 	OnHeartbeatSent         func(client *RealtimeClient)
 }
 
-func CreateRealtimeClient(projectRef string, apiKey string, events []supabase_realtime_go.PostgresChanges) *RealtimeClient {
+func CreateRealtimeClient(projectRef string, apiKey string, events []types.PostgresChanges) *RealtimeClient {
 	realtimeUrl := fmt.Sprintf(
 		"wss://%s.supabase.co/realtime/v1/websocket?apikey=%s&log_level=info&vsn=1.0.0",
 		projectRef,
@@ -47,9 +47,22 @@ func CreateRealtimeClient(projectRef string, apiKey string, events []supabase_re
 		dialTimeout:       10 * time.Second,
 		heartbeatDuration: 5 * time.Second,
 		joinDuration:      5 * time.Second,
+
+		OnDial:       func(client *RealtimeClient) {},
+		OnDisconnect: func(client *RealtimeClient) {},
+
+		OnHeartbeatFailed:       func(isConAlive bool, err error, client *RealtimeClient) {},
+		OnHeartbeatRedialFailed: func(err error, client *RealtimeClient) {},
+		OnHeartbeatSent:         func(client *RealtimeClient) {},
 	}
 }
 
 func (x *RealtimeClient) GetWS() *websocket.Conn {
 	return x.conn
+}
+
+func (x *RealtimeClient) SetDelays(dialTimeout, heartbeatDuration, joinDuration time.Duration) {
+	x.dialTimeout = dialTimeout
+	x.heartbeatDuration = heartbeatDuration
+	x.joinDuration = joinDuration
 }
