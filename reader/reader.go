@@ -40,6 +40,11 @@ func (x *Reader) Start() {
 }
 
 func (x *Reader) Dispose() {
+
+	if x.ctx != nil {
+		x.cancel()
+	}
+
 	x.disposed = true
 }
 
